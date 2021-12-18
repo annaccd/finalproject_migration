@@ -1,11 +1,17 @@
 ---
 title: "Final project"
-output: html_document
+author: "Anna Clara Deniz and Anna Weronika Matysiak"
+date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 
 ```{r message=FALSE, warning=FALSE}
 library(data.table)
@@ -25,6 +31,7 @@ library(maps)
 library(ggthemes)
 library(hrbrthemes)
 library(gifski)
+library(geosphere)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -33,7 +40,7 @@ library(gifski)
 #read_tsv("migr.tsv")
 
 #http://appsso.eurostat.ec.europa.eu/nui/show.do
-data<-read.csv("data_full.csv")
+data<-read.csv("data/data_full.csv")
 ```
 
 ```{r include=FALSE}
@@ -49,36 +56,48 @@ data$Value<-replaceCommas(data$Value)
 
 data$GEO[data$GEO=="Germany (until 1990 former territory of the FRG)"]<-"Germany"
 
+
+
+
 ```
 
 A. Connected scatter plot of all decision by its type
 
-```{r echo=FALSE}
-data %>% 
- filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)") %>% filter(ISCO08=="Total")%>% group_by(DECISION,TIME) %>% ungroup()%>%
-  plot_ly(x=~TIME, y=~Value, group=~DECISION,
+```{r echo=FALSE, warning=FALSE}
+
+plotly_data_1<-data %>% 
+ filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)") %>% filter(ISCO08=="Total")%>% group_by(DECISION,TIME) %>% ungroup()
+
+plot_1<-plotly_data_1%>% group_by(DECISION)%>%plot_ly(x=~TIME, y=~Value,
                            type="scatter",color=~DECISION, mode="lines") %>%
   layout(title = "Blue Card applications status in the EU over years 2012-2019",
          xaxis = list(title = "years"),
          yaxis = list(title = "number of applications"))%>%
   layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
+
+plot_1
+
 ```
 B.OCCUPATIONS
-```{r echo=FALSE}
-data %>%filter(DECISION=="Granted")%>% filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)")%>%filter(ISCO08!="Total" & ISCO08!="Unknown")%>%filter(TIME!="2020")%>%
-  group_by(ISCO08,TIME)%>%ungroup()%>%
-  plot_ly(x=~TIME, y=~Value, group=~ISCO08,
+```{r echo=FALSE, warning=FALSE}
+plotly_data<-data %>%filter(DECISION=="Granted")%>% filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)")%>%filter(ISCO08!="Total" & ISCO08!="Unknown")%>%filter(TIME!="2020")%>%
+  group_by(ISCO08,TIME)%>%ungroup()
+  
+plot_2<- plotly_data%>% group_by(ISCO08)%>%plot_ly(x=~TIME, y=~Value,
                            type="scatter",color=~ISCO08, mode="lines")%>%
   layout(title = "Decision granted by type of occupation 2012-2019",
          xaxis = list(title = ""),
          yaxis = list(title = ""))%>%
   layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
+
+htmlwidgets::saveWidget(plot_2, file = "plots/plot_2.html")
+plot_2
 ```
 
 C. ANIMATION
 1) Change the colors
 2) How to change the size of the area and space between the graphs 
-```{r}
+```{r warning=FALSE}
 ranked_by_year<-data %>%filter(DECISION=="Granted" & ISCO08=="Total")%>%filter(GEO!="European Union - 27 countries (from 2020)" & GEO!="European Union - 28 countries (2013-2020)")%>% filter(TIME!=2020)%>%
   select(TIME, GEO, Value)%>%group_by(GEO) %>% mutate(pop=cumsum(Value))%>%group_by(TIME)%>%
   arrange(TIME, -pop) %>%  
@@ -129,6 +148,6 @@ transition_length = 4, state_length = 1, wrap = FALSE) +
 #       renderer = gifski_renderer("anim_gdp.gif"))
 
 animate(animated, 150, fps = 5,  end_pause = 30,
-        renderer = gifski_renderer("gganim.gif"))
+        renderer = gifski_renderer("plots/gganim.gif"))
 ```
 
