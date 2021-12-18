@@ -7,6 +7,28 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r include=FALSE}
+library(data.table)
+library(R.utils)
+library(readr)
+library(devtools)
+library(tidyverse)
+library(knitr)
+library(plotly)
+library(lubridate)
+library(gapminder)
+library(gganimate)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(maps)
+library(ggthemes)
+library(hrbrthemes)
+library(gifski)
+library(geosphere)
+```
+
+
 ```{r}
 #https://www.r-graph-gallery.com/how-to-draw-connecting-routes-on-map-with-r-and-great-circles.html
 

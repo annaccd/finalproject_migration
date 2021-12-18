@@ -6,7 +6,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      error = FALSE,
+                      message = FALSE,
+                      warning = FALSE,
+                      comment = NA)
 ```
 
 ```{r include=FALSE}
@@ -30,30 +35,29 @@ library(gifski)
 library(geosphere)
 library(shiny)
 ```
-CONTRIBUTORS:
-Anna Deniz - emial:
-Anna Matysiak - emial:
+
 
 EXECUTIVE SUMMARY
 
 QUESTION
 
 ANALYSIS
-1) High-skilled migration to EU over years
+
+<br>
+
+
 
 ```{r testing, echo=FALSE}
 knitr::include_graphics("plots/gganim.gif")
 ```
+<br>
 
-2) APPLICATIONS FOR EU BLUE CRARD OVER YEARS
-```{r echo=FALSE}
-shiny::includeHTML("plots/plot_1.html") 
+```{r showChoro1, out.extra='style="border:none;"', echo=FALSE, }
+knitr::include_url("plots/plot_1.html")
 ```
+<br>
 
-3) TYPES OF OCCUPATION
-
-```{r echo=FALSE}
-shiny::includeHTML("plots/plot_2.html") 
+```{r showChoro2, out.extra='style="border:none;"', echo=FALSE}
+knitr::include_url("plots/plot_2.html")
 ```
-
-
+<br>

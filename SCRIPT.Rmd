@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 library(data.table)
 library(R.utils)
 library(readr)
@@ -53,11 +53,7 @@ replaceCommas<-function(x){
 }
 
 data$Value<-replaceCommas(data$Value)
-
 data$GEO[data$GEO=="Germany (until 1990 former territory of the FRG)"]<-"Germany"
-
-
-
 
 ```
 
@@ -73,11 +69,11 @@ plot_1<-plotly_data_1%>% group_by(DECISION)%>%plot_ly(x=~TIME, y=~Value,
   layout(title = "Blue Card applications status in the EU over years 2012-2019",
          xaxis = list(title = "years"),
          yaxis = list(title = "number of applications"))%>%
-  layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
-
+  layout(autosize = T)
+htmlwidgets::saveWidget(plot_1, file = "plots/plot_1.html")
 plot_1
-
 ```
+
 B.OCCUPATIONS
 ```{r echo=FALSE, warning=FALSE}
 plotly_data<-data %>%filter(DECISION=="Granted")%>% filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)")%>%filter(ISCO08!="Total" & ISCO08!="Unknown")%>%filter(TIME!="2020")%>%
@@ -88,8 +84,8 @@ plot_2<- plotly_data%>% group_by(ISCO08)%>%plot_ly(x=~TIME, y=~Value,
   layout(title = "Decision granted by type of occupation 2012-2019",
          xaxis = list(title = ""),
          yaxis = list(title = ""))%>%
-  layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
-
+  layout(autosize = T)
+#  layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
 htmlwidgets::saveWidget(plot_2, file = "plots/plot_2.html")
 plot_2
 ```
@@ -143,9 +139,6 @@ transition_length = 4, state_length = 1, wrap = FALSE) +
   labs(title = 'All accepted aplications until 2019',  
        subtitle  =  "Cumulative increase by country",
        caption  = "Data Source:")
-
-#animate(animated, 150, fps = 5, end_pause = 30, 
-#       renderer = gifski_renderer("anim_gdp.gif"))
 
 animate(animated, 150, fps = 5,  end_pause = 30,
         renderer = gifski_renderer("plots/gganim.gif"))
