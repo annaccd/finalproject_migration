@@ -1,0 +1,153 @@
+---
+title: "Final project"
+author: "Anna Clara Deniz and Anna Weronika Matysiak"
+date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(data.table)
+library(R.utils)
+library(readr)
+library(devtools)
+library(tidyverse)
+library(knitr)
+library(plotly)
+library(lubridate)
+library(gapminder)
+library(gganimate)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(maps)
+library(ggthemes)
+library(hrbrthemes)
+library(gifski)
+library(geosphere)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#gunzip("migr.tsv.gz")
+#dt = fread("migr.tsv", header=T, sep="\t", stringsAsFactors=F)
+#read_tsv("migr.tsv")
+
+#http://appsso.eurostat.ec.europa.eu/nui/show.do
+data<-read.csv("data/data_full.csv")
+```
+
+```{r include=FALSE}
+data<- data %>% 
+    mutate_at(vars(Value), ~ na_if(., "")) %>% na_if(.,":") %>%
+        select(!Flag.and.Footnotes)%>%na.omit()
+
+replaceCommas<-function(x){
+  x<-as.numeric(gsub("\\,", "", x))
+}
+
+data$Value<-replaceCommas(data$Value)
+
+data$GEO[data$GEO=="Germany (until 1990 former territory of the FRG)"]<-"Germany"
+
+
+
+
+```
+
+A. Connected scatter plot of all decision by its type
+
+```{r echo=FALSE, warning=FALSE}
+
+plotly_data_1<-data %>% 
+ filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)") %>% filter(ISCO08=="Total")%>% group_by(DECISION,TIME) %>% ungroup()
+
+plot_1<-plotly_data_1%>% group_by(DECISION)%>%plot_ly(x=~TIME, y=~Value,
+                           type="scatter",color=~DECISION, mode="lines") %>%
+  layout(title = "Blue Card applications status in the EU over years 2012-2019",
+         xaxis = list(title = "years"),
+         yaxis = list(title = "number of applications"))%>%
+  layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
+
+plot_1
+
+```
+B.OCCUPATIONS
+```{r echo=FALSE, warning=FALSE}
+plotly_data<-data %>%filter(DECISION=="Granted")%>% filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)")%>%filter(ISCO08!="Total" & ISCO08!="Unknown")%>%filter(TIME!="2020")%>%
+  group_by(ISCO08,TIME)%>%ungroup()
+  
+plot_2<- plotly_data%>% group_by(ISCO08)%>%plot_ly(x=~TIME, y=~Value,
+                           type="scatter",color=~ISCO08, mode="lines")%>%
+  layout(title = "Decision granted by type of occupation 2012-2019",
+         xaxis = list(title = ""),
+         yaxis = list(title = ""))%>%
+  layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
+
+htmlwidgets::saveWidget(plot_2, file = "plots/plot_2.html")
+plot_2
+```
+
+C. ANIMATION
+1) Change the colors
+2) How to change the size of the area and space between the graphs 
+```{r warning=FALSE}
+ranked_by_year<-data %>%filter(DECISION=="Granted" & ISCO08=="Total")%>%filter(GEO!="European Union - 27 countries (from 2020)" & GEO!="European Union - 28 countries (2013-2020)")%>% filter(TIME!=2020)%>%
+  select(TIME, GEO, Value)%>%group_by(GEO) %>% mutate(pop=cumsum(Value))%>%group_by(TIME)%>%
+  arrange(TIME, -pop) %>%  
+  mutate(rank = 1:n())%>% filter(rank <= 15)
+
+
+static_plot <- ggplot(ranked_by_year, aes(rank, group = GEO, fill=GEO, color=GEO)) +  
+  geom_tile(aes(y = pop/2,
+                height = pop,
+                width = 0.75), alpha = 0.8) +
+  geom_text(aes(y = 0, label = paste(GEO, " ")), vjust = 0.2, hjust = 1, size=4.5) +
+  geom_text(aes(x=30, y=max(pop) , label = as.factor(TIME)), vjust = 0.2, alpha = 0.5,  col = "gray", size = 16) +
+ coord_flip(clip = "off", expand = FALSE) +
+  scale_x_reverse() +
+  scale_y_continuous(labels = scales::comma) +
+   guides(color = FALSE, fill = FALSE) +
+  scale_fill_discrete(guide = guide_legend(title.theme = element_text(
+      size = 20), label.theme = element_text(size = 15))) +
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_line( size=.1, color="grey" ),
+        panel.grid.minor.x = element_line( size=.1, color="grey" ),
+        plot.title=element_text(size=20, hjust=0, face="bold", colour="black", vjust=-1),
+        plot.subtitle=element_text(size=10, hjust=1, face="italic", color="grey"),
+        plot.caption =element_text(size=8, hjust=1, face="italic", color="grey"),
+        plot.background=element_blank(),
+       plot.margin = margin(2,2, 2, 4, "cm"))
+
+animated <- static_plot+ transition_states(TIME,
+transition_length = 4, state_length = 1, wrap = FALSE) +
+  view_follow(fixed_x = TRUE)  +
+  ease_aes('linear')+
+    enter_fade()+
+    exit_fade() +
+  labs(title = 'All accepted aplications until 2019',  
+       subtitle  =  "Cumulative increase by country",
+       caption  = "Data Source:")
+
+#animate(animated, 150, fps = 5, end_pause = 30, 
+#       renderer = gifski_renderer("anim_gdp.gif"))
+
+animate(animated, 150, fps = 5,  end_pause = 30,
+        renderer = gifski_renderer("plots/gganim.gif"))
+```
+

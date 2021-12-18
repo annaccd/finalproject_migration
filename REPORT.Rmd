@@ -1,0 +1,59 @@
+---
+title: "Data report"
+author: "Anna Clara Deniz and Anna Weronika Matysiak"
+date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(data.table)
+library(R.utils)
+library(readr)
+library(devtools)
+library(tidyverse)
+library(knitr)
+library(plotly)
+library(lubridate)
+library(gapminder)
+library(gganimate)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(maps)
+library(ggthemes)
+library(hrbrthemes)
+library(gifski)
+library(geosphere)
+library(shiny)
+```
+CONTRIBUTORS:
+Anna Deniz - emial:
+Anna Matysiak - emial:
+
+EXECUTIVE SUMMARY
+
+QUESTION
+
+ANALYSIS
+1) High-skilled migration to EU over years
+
+```{r testing, echo=FALSE}
+knitr::include_graphics("plots/gganim.gif")
+```
+
+2) APPLICATIONS FOR EU BLUE CRARD OVER YEARS
+```{r echo=FALSE}
+shiny::includeHTML("plots/plot_1.html") 
+```
+
+3) TYPES OF OCCUPATION
+
+```{r echo=FALSE}
+shiny::includeHTML("plots/plot_2.html") 
+```
+
+
