@@ -91,21 +91,20 @@ plot_2
 ```
 
 C. ANIMATION
-1) Change the colors
-2) How to change the size of the area and space between the graphs 
+
 ```{r warning=FALSE}
 ranked_by_year<-data %>%filter(DECISION=="Granted" & ISCO08=="Total")%>%filter(GEO!="European Union - 27 countries (from 2020)" & GEO!="European Union - 28 countries (2013-2020)")%>% filter(TIME!=2020)%>%
-  select(TIME, GEO, Value)%>%group_by(GEO) %>% mutate(pop=cumsum(Value))%>%group_by(TIME)%>%
-  arrange(TIME, -pop) %>%  
-  mutate(rank = 1:n())%>% filter(rank <= 15)
-
+  select(TIME, GEO, Value) %>%group_by(GEO)%>% mutate(pop=cumsum(Value))%>%group_by(TIME)%>%
+  arrange(TIME,-pop) %>%  
+  mutate(rank = 1:n(),  pop_lbl = paste0(" ", pop))%>% filter(rank <= 15)
 
 static_plot <- ggplot(ranked_by_year, aes(rank, group = GEO, fill=GEO, color=GEO)) +  
   geom_tile(aes(y = pop/2,
                 height = pop,
                 width = 0.75), alpha = 0.8) +
   geom_text(aes(y = 0, label = paste(GEO, " ")), vjust = 0.2, hjust = 1, size=4.5) +
-  geom_text(aes(x=30, y=max(pop) , label = as.factor(TIME)), vjust = 0.2, alpha = 0.5,  col = "gray", size = 16) +
+  geom_text(aes(y=max(pop),label = paste(pop_lbl, " ")),vjust = 0.2, hjust = 0, size=4.5, col = "gray") +
+
  coord_flip(clip = "off", expand = FALSE) +
   scale_x_reverse() +
   scale_y_continuous(labels = scales::comma) +
@@ -124,11 +123,11 @@ static_plot <- ggplot(ranked_by_year, aes(rank, group = GEO, fill=GEO, color=GEO
         panel.grid.minor=element_blank(),
         panel.grid.major.x = element_line( size=.1, color="grey" ),
         panel.grid.minor.x = element_line( size=.1, color="grey" ),
-        plot.title=element_text(size=20, hjust=0, face="bold", colour="black", vjust=-1),
-        plot.subtitle=element_text(size=10, hjust=1, face="italic", color="grey"),
+        plot.title=element_text(size=20, hjust=0, colour="black", vjust=-1),
         plot.caption =element_text(size=8, hjust=1, face="italic", color="grey"),
         plot.background=element_blank(),
        plot.margin = margin(2,2, 2, 4, "cm"))
+
 
 animated <- static_plot+ transition_states(TIME,
 transition_length = 4, state_length = 1, wrap = FALSE) +
@@ -136,11 +135,11 @@ transition_length = 4, state_length = 1, wrap = FALSE) +
   ease_aes('linear')+
     enter_fade()+
     exit_fade() +
-  labs(title = 'All accepted aplications until 2019',  
-       subtitle  =  "Cumulative increase by country",
-       caption  = "Data Source:")
+  labs(title = 'Accepted aplications untill {closest_state}',  
+       subtitle  =  "Cumulative increase by country from 2012")
 
-animate(animated, 150, fps = 5,  end_pause = 30,
+
+animate(animated, 150, fps = 5,  end_pause = 50, duration = 40,
         renderer = gifski_renderer("plots/gganim.gif"))
 ```
 
