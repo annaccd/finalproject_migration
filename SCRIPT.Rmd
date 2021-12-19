@@ -1,5 +1,5 @@
 ---
-title: "Final project"
+title: "Final project - scrip"
 author: "Anna Clara Deniz and Anna Weronika Matysiak"
 date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
 output:
@@ -72,12 +72,12 @@ plot_1<-plotly_data_1%>% group_by(DECISION)%>%plot_ly(x=~TIME, y=~Value,
 htmlwidgets::saveWidget(plot_1, file = "plots/plot_1.html")
 plot_1
 ```
-```{r}
+
+```{r message=FALSE, warning=FALSE}
 total<-data %>% 
  filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)") %>% filter(ISCO08=="Total")
 
 sum(total$Value)
-
 ```
 
 B.OCCUPATIONS
@@ -150,13 +150,10 @@ animate(animated, 150, fps = 5,  end_pause = 50, duration = 40,
 ```
 
 
-```{r}
-
+```{r message=FALSE, warning=FALSE}
 table_1<-data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO=="France")%>%filter(TIME==2019)%>%
   filter(DECISION=="Granted")%>%unique()%>%
   select(GEO, ISCO08, pop)%>%
   filter(ISCO08!="Total" & ISCO08!="Unknown")%>% filter(pop!=0)%>%arrange(-pop)
-
-
 ```
 
