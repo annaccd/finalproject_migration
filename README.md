@@ -1,4 +1,4 @@
-#Highly skilled migration to Europe in data
+# Highly skilled migration to Europe in data
 
 ### MOTIVATION
 Every year, European countries receive thousands of applicants for their Blue Card scheme. The EU Blue Card is a work- and residence permit for highly skilled non-EU/EEA nationals. Our final data science project will take the form of a piece of data-driven journalism. The article will be investigating the profile of migrants. The analysis is based on the
