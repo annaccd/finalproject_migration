@@ -8,7 +8,6 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -54,7 +53,6 @@ replaceCommas<-function(x){
 
 data$Value<-replaceCommas(data$Value)
 data$GEO[data$GEO=="Germany (until 1990 former territory of the FRG)"]<-"Germany"
-
 ```
 
 A. Connected scatter plot of all decision by its type
@@ -70,6 +68,7 @@ plot_1<-plotly_data_1%>% group_by(DECISION)%>%plot_ly(x=~TIME, y=~Value,
          xaxis = list(title = "years"),
          yaxis = list(title = "number of applications"))%>%
   layout(autosize = T)
+
 htmlwidgets::saveWidget(plot_1, file = "plots/plot_1.html")
 plot_1
 ```
@@ -85,7 +84,7 @@ plot_2<- plotly_data%>% group_by(ISCO08)%>%plot_ly(x=~TIME, y=~Value,
          xaxis = list(title = ""),
          yaxis = list(title = ""))%>%
   layout(autosize = T)
-#  layout(autosize = F, height = 500, margin = list(l=50, r=50, b=100, t=100, pad=4))
+
 htmlwidgets::saveWidget(plot_2, file = "plots/plot_2.html")
 plot_2
 ```
@@ -141,5 +140,15 @@ transition_length = 4, state_length = 1, wrap = FALSE) +
 
 animate(animated, 150, fps = 5,  end_pause = 50, duration = 40,
         renderer = gifski_renderer("plots/gganim.gif"))
+```
+
+
+```{r}
+
+data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO=="France")%>%filter(TIME==2019)%>%
+  filter(DECISION=="Granted")%>%unique()%>%
+  select(GEO, ISCO08, pop)%>%
+  filter(ISCO08!="Total" & ISCO08!="Unknown")%>% filter(pop!=0)%>%arrange(-pop)
+
 ```
 

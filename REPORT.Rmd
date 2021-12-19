@@ -1,8 +1,15 @@
 ---
-title: "Data report"
+title: "Highly skilled migration to Europe in data"
 author: "Anna Clara Deniz and Anna Weronika Matysiak"
 date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
-output: html_document
+output:
+  html_document:
+    code_folding: show
+    df_print: paged
+    highlight: tango
+    number_sections: no
+    theme: cosmo
+    toc: no
 ---
 
 ```{r setup, include=FALSE}
@@ -34,18 +41,17 @@ library(hrbrthemes)
 library(gifski)
 library(geosphere)
 library(shiny)
+library(kableExtra)
 ```
 
+**The analysis of Eurostat Data "EU Blue Cards by type of decision, occupation and citizenship" from 2021, shows a few important patterns. From 2012 there has been a gradual increase in numbers of applictions for EU Blue Card. From 2012 till 2019, countries that accepted the most applicats were Germany, France and Poland. (...) **
 
-EXECUTIVE SUMMARY
 
-QUESTION
+Despite the continuous increase in the number of migrants to the European Union, results from the Special Eurobarometer 469 show that Europeans know very little about immigration. Around 37% of people said that they are very well informed and only around 4% declared that they are very well informed (XXXX). Moreover, almost 30% of those surveyed could not estimate the percentage of immigrants from outside of the EU in their countries. On the other extreme, around 17% claimed that the share of immigrants is over ¼ of inhabitants of their countries (XXXX). At the same time, around 38% of respondents think that immigration from outside the EU is more of a problem and only 1/5 believe that immigration is an opportunity. This article aims to fill this knowledge gap and provide insights into high-skilled migration from outside of the EU. Firstly, the article tries to bring the readers closer to this issue and secondly attempts to see to what extent this High-skilled immigration can be perceived as an opportunity in the case of France. This is particularly important in the light of the recently enacted New Pact on Migration and Asylum to attract more high-skilled migrants to the EU.
 
 ANALYSIS
 
 <br>
-
-
 
 ```{r testing, echo=FALSE}
 knitr::include_graphics("plots/gganim.gif")
@@ -60,4 +66,5 @@ knitr::include_url("plots/plot_1.html")
 ```{r showChoro2, out.extra='style="border:none;"', echo=FALSE}
 knitr::include_url("plots/plot_2.html")
 ```
+
 <br>
