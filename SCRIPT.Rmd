@@ -72,6 +72,13 @@ plot_1<-plotly_data_1%>% group_by(DECISION)%>%plot_ly(x=~TIME, y=~Value,
 htmlwidgets::saveWidget(plot_1, file = "plots/plot_1.html")
 plot_1
 ```
+```{r}
+total<-data %>% 
+ filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)") %>% filter(ISCO08=="Total")
+
+sum(total$Value)
+
+```
 
 B.OCCUPATIONS
 ```{r echo=FALSE, warning=FALSE}
