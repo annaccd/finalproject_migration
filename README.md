@@ -7,5 +7,5 @@ Every year, European countries receive thousands of applicants for their Blue Ca
 Our aim is to provide the general public with the characteristics of migrants and describe their influx trend within Europe.
 
 ### Contribution
-Anna Deniz - analysis at the state level
-Anna Matysiak - analysis of the general data and profiles for all EU
+- Anna Deniz - analysis at the state level
+- Anna Matysiak - analysis of the general data and profiles for all EU
