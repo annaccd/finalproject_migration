@@ -152,10 +152,11 @@ animate(animated, 150, fps = 5,  end_pause = 50, duration = 40,
 
 ```{r}
 
-data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO=="France")%>%filter(TIME==2019)%>%
+table_1<-data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO=="France")%>%filter(TIME==2019)%>%
   filter(DECISION=="Granted")%>%unique()%>%
   select(GEO, ISCO08, pop)%>%
   filter(ISCO08!="Total" & ISCO08!="Unknown")%>% filter(pop!=0)%>%arrange(-pop)
+
 
 ```
 

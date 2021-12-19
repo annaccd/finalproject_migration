@@ -52,17 +52,19 @@ Despite the continuous increase in the number of migrants to the European Union,
 # *An EU Blue Card gives highly-qualified workers from outside the EU the right to live and work in an EU country, provided they have higher professional qualifications, such as a university degree,and an employment contract or a binding job offer with a high salary compared to the average in the EU country where the job is.* 
 [European Commission](https://ec.europa.eu/immigration/blue-card/essential-information_en)
 
-According to Eurostat Data (XXXX), from 2012 till 2019, EU states received 179 597 applications. The number does not include the UK. Additionally, data for Croatia before accessing the EU are not available. More remarkably data for Cyprus and Greece are missing. Individual numbers are missing for 2012. Still, the number of people that have applied over these years exceeds the population of Potsdam and is still increasing. European Union has decided recently to simplify the process in order to attract more high-skilled workers to Europe. Note, that EU Blue Card does not apply in Denmark and Ireland. 
+According to Eurostat Data (XXXX), from 2012 till 2019, EU states received 179 597 applications. The number does not include the UK. Additionally, data for Croatia before accessing the EU are not available. More remarkably data for Cyprus and Greece are missing. Individual numbers are missing for 2012. Still, the number of people that have applied over these years exceeds the population of Potsdam and is still increasing. European Union has decided recently to simplify the process in order to attract more high-skilled workers to Europe. Note, that EU Blue Card does not apply in Denmark and Ireland.
 
-The comparison with Potsdam was not accidental. According to data (XXXX), the majority of the successful applications were recorded in Germany, that over 7 years admitted almost 134 916 applications. In comparison the second biggest number was noted in France - 7100. The third country with the highest number of successful applications was Poland that admitted 5257 immigrants which is around 25% of the applications in Germany. The below animations shows the acumulated increase of accepted applications for each top 15 EU states over seven years. 
-
-```{r fig.align="center", echo=FALSE}
-knitr::include_graphics("plots/gganim.gif")
-```
-<br>
+Mentioned data shows, that there is a clear increasing tendency in the granted applications. Below you can compare them, with the numbers of Renewed but also Withdrawn applications. As you can see, the Withdrawn applications also increased, however, in comparison to the successful applications the result is small. There were only around 400 Withdrawn applications until 2019, whereas the granted applications increased by almost 30k.
 
 ```{r showChoro1, out.extra='style="border:none;"', fig.align="center", echo=FALSE }
 knitr::include_url("plots/plot_1.html")
+```
+<br>
+
+Nevertheless, the numbers of granted applications differed accross the countries.The comparison with Potsdam was not accidental. According to data (XXXX), the majority of the successful applications were recorded in Germany, that over 7 years admitted almost 134 916 applications. In comparison the second biggest number was noted in France - 7100. The third country with the highest number of successful applications was Poland that admitted 5257 immigrants which is around 25% of the applications in Germany. The below animations shows the acumulated increase of accepted applications for each top 15 EU states from 2012 till 2019.
+
+```{r fig.align="center", echo=FALSE}
+knitr::include_graphics("plots/gganim.gif")
 ```
 <br>
 
