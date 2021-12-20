@@ -155,10 +155,18 @@ transition_length = 4, state_length = 1, wrap = FALSE) +
 animate(animated, 150, fps = 5,  end_pause = 50, duration = 40,
         renderer = gifski_renderer("plots/gganim.gif"))
 ```
+D France
+```{r message=FALSE, warning=FALSE}
+table_1<-data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO=="France")%>%filter(TIME==2019)%>%
+  filter(DECISION=="Granted")%>%unique()%>%
+  select(GEO, ISCO08, pop)%>%
+  filter(ISCO08!="Total" & ISCO08!="Unknown")%>% filter(pop!=0)%>%arrange(-pop)
+table_1
+```
 
 Import Data
 
-```{r warning=FALSE}
+```{r message=FALSE, warning=FALSE}
 
 # EU Blue Card Data
 eu_data <- read_csv("data/data_partial.csv")
@@ -203,17 +211,9 @@ top_geo_data <- eu_data %>%
 
 ```
 
-```{r message=FALSE, warning=FALSE}
-table_1<-data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO=="France")%>%filter(TIME==2019)%>%
-  filter(DECISION=="Granted")%>%unique()%>%
-  select(GEO, ISCO08, pop)%>%
-  filter(ISCO08!="Total" & ISCO08!="Unknown")%>% filter(pop!=0)%>%arrange(-pop)
-```
-
 Plot Data
 
 ```{r warning=FALSE}
-
 # World Map
 data("world.cities")
 citizen_coordinates <- world.cities %>%
@@ -242,38 +242,37 @@ map('world',
     col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,
     mar=rep(0,4),border=0, ylim=c(-80,80))
 
-points(x=dots_map$long, y=dots_map$lat, col="slateblue", cex=3, pch=20) 
+points(x=dots_map$long, y=dots_map$lat, col="slateblue", cex=2, pch=20) 
 
 inter <- gcIntermediate(Syria, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2)  
+lines(inter, col="skyblue", lwd=1)  
 
 inter <- gcIntermediate(Serbia, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2) 
+lines(inter, col="skyblue", lwd=1) 
 
 inter <- gcIntermediate(Pakistan, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2) 
+lines(inter, col="skyblue", lwd=1) 
 
 inter <- gcIntermediate(Mexico, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2) 
+lines(inter, col="skyblue", lwd=1) 
 
 inter <- gcIntermediate(Tunisia, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2) 
+lines(inter, col="skyblue", lwd=1) 
 
 inter <- gcIntermediate(Brazil, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2) 
+lines(inter, col="skyblue", lwd=1) 
 
 inter <- gcIntermediate(Egypt, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2) 
+lines(inter, col="skyblue", lwd=1) 
 
 inter <- gcIntermediate(Iran, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
 lines(inter, col="skyblue", lwd=2) 
 
 inter <- gcIntermediate(USA, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F)
-lines(inter, col="skyblue", lwd=2) 
+lines(inter, col="skyblue", lwd=1) 
 
 inter <- gcIntermediate(SKorea, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
-lines(inter, col="skyblue", lwd=2)
-
+lines(inter, col="skyblue", lwd=1)
 ```
 
 ```{r warning=FALSE}
