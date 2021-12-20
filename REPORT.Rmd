@@ -27,14 +27,92 @@ knitr::opts_chunk$set(echo = TRUE,
 ```
 
 ```{r include=FALSE}
+library(data.table)
+library(R.utils)
 library(readr)
 library(devtools)
 library(tidyverse)
 library(knitr)
+library(plotly)
+library(lubridate)
+library(gapminder)
+library(gganimate)
 library(ggplot2)
-library(shiny)
-library(kableExtra)
+library(sf)
+library(rnaturalearth)
+library(maps)
+library(ggthemes)
+library(hrbrthemes)
+library(gifski)
+library(geosphere)
+library(dplyr)
+library(tibble)
+library(leaflet)
+library(rgdal)
+library(gridExtra)
+library(grid)
+library(geojsonio)
 ```
+
+<center>
+```{r echo=FALSE, warning=FALSE}
+#graphics for the beckground
+Europe <- c(2,49)
+Syria <- c(36.32,33.50)        
+Serbia <- c(20.50,44.83)        
+Pakistan <- c(73.06,33.72)      
+Mexico <- c(-99.14,19.43)         
+Tunisia <- c(10.22,36.84)        
+Brazil <- c(-47.91,-15.78)         
+Egypt <- c(31.25,30.06)          
+Iran <- c(51.43,35.67)           
+USA <- c(-77.02,38.91)  
+SKorea <- c(126.99,37.56)    
+
+dots_map <- rbind(Europe, Syria, Serbia, Pakistan, Mexico, 
+                  Tunisia, Brazil, Egypt, Iran, USA, SKorea) %>% 
+as.data.frame()
+colnames(dots_map) <- c("long","lat")
+
+par(mar=c(0,0,0,0))
+map('world',
+    col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,
+    mar=rep(0,4),border=0, ylim=c(-80,80))
+
+points(x=dots_map$long, y=dots_map$lat, col="slateblue", cex=2, pch=20) 
+
+inter <- gcIntermediate(Syria, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1)  
+
+inter <- gcIntermediate(Serbia, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1) 
+
+inter <- gcIntermediate(Pakistan, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1) 
+
+inter <- gcIntermediate(Mexico, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1) 
+
+inter <- gcIntermediate(Tunisia, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1) 
+
+inter <- gcIntermediate(Brazil, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1) 
+
+inter <- gcIntermediate(Egypt, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1) 
+
+inter <- gcIntermediate(Iran, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=2) 
+
+inter <- gcIntermediate(USA, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F)
+lines(inter, col="skyblue", lwd=1) 
+
+inter <- gcIntermediate(SKorea, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=F) 
+lines(inter, col="skyblue", lwd=1)
+```
+</center>
+
 
 **The analysis of Eurostat Data "EU Blue Cards by type of decision, occupation and citizenship" from 2021, shows a few important patterns. From 2012 there has been a gradual increase in the number of granted EU Blue Cards. From 2012 till 2019, Germany, France, and Poland were the countries that accepted the most applicants… **
 
@@ -51,25 +129,20 @@ Despite the continuous increase in the number of immigrants to the European Unio
 
 According to [Eurostat Data](http://appsso.eurostat.ec.europa.eu/nui/show.do?dataset=migr_resbc1), from 2012 till 2019, EU states received 179 597 applications. The number does not include the UK. Additionally, data for Croatia before accessing the EU are not available. More remarkably data for Cyprus and Greece are missing. Individual numbers are also absent for 2012. Still, the number of people that have applied over these years exceeds the population of Potsdam and is still increasing. Moreover, European Union has decided recently to simplify the process in order to attract more high-skilled workers to Europe. Note, that EU Blue Card does not apply in Denmark and Ireland.
 
-Mentioned data shows, that there is a clear increasing tendency in the granted applications. Below you can compare them, with the numbers of renewed but also withdrawn applications over years. As you can see, the Withdrawn applications also increased, however, in comparison to the successful applications the increase has been modest. There were only around 400 Withdrawn applications until 2019, whereas the granted applications increased by more than 30k.
-
-
 <center>
 ```{r showChoro1, out.extra='style="border:none;"', fig.align="c", echo=FALSE }
 knitr::include_url("plots/plot_1.html")
 ```
 </center>
 
-
-Nevertheless, the numbers of granted applications differed across the countries. The comparison with Potsdam was not accidental. According to Eurostat data, the majority of the successful applications were recorded in Germany, which over 7 years admitted almost 134 916 applications. In comparison, the second biggest number was noted in France - 7100. The third country with the highest number of successful applications was Poland that admitted 5257 immigrants. This is around 25% of the accepted applications in Germany. The animation below shows the accumulated increase of accepted applications for each top 15 EU states from 2012 till 2019.
+Mentioned data shows, that there is a clear increasing tendency in the granted applications. Above you can compare them, with the numbers of renewed but also withdrawn applications over years. As you can see, the Withdrawn applications also increased, however, in comparison to the successful applications the increase has been modest. There were only around 400 Withdrawn applications until 2019, whereas the granted applications increased by more than 30k.
 
 
 ```{r fig.align="center", echo=FALSE}
 knitr::include_graphics("plots/gganim.gif")
 ```
 
-
-Could these high-skilled immigrants be the response to the mismatch of the skills and skills gap at the EU market? Potentially, looking at the qualification of the professionals from the outside of Europe, we can see a few patterns that could be insightful. The stable and consequent increase can be observed among people who declare to have background in science and engineering but also among these who claim to be ICT professionals. These skills are sought-after at the EU market.For example, only in 2019 55% surveyed companies experienced difficulties in recruiting ICT specialists. [Eurostat](https://ec.europa.eu/eurostat/databrowser/view/isoc_ske_itspen2/default/table?lang=en)
+Nevertheless, the numbers of granted applications differed across the countries. The comparison with Potsdam was not accidental. According to Eurostat data, the majority of the successful applications were recorded in Germany, which over 7 years admitted almost 134 916 applications. In comparison, the second biggest number was noted in France - 7100. The third country with the highest number of successful applications was Poland that admitted 5257 immigrants. This is around 25% of the accepted applications in Germany. The animation below shows the accumulated increase of accepted applications for each top 15 EU states from 2012 till 2019.
 
 ---
 
@@ -80,12 +153,16 @@ in 2025. The share of those with low-level qualifications will fall from 21.5% i
 
 ---
 
+Could these high-skilled immigrants be the response to the mismatch of the skills and skills gap at the EU market? Potentially, looking at the qualification of the professionals from the outside of Europe, we can see a few patterns that could be insightful. The stable and consequent increase can be observed among people who declare to have background in science and engineering but also among these who claim to be ICT professionals. These skills are sought-after at the EU market. For example, only in 2019 55% surveyed companies experienced difficulties in recruiting ICT specialists [Eurostat.](https://ec.europa.eu/eurostat/databrowser/view/isoc_ske_itspen2/default/table?lang=en)
+
+
 <center>
 ```{r showChoro2, out.extra='style="border:none;"', fig.align="center", echo=FALSE}
 knitr::include_url("plots/plot_2.html")
 ```
 </center>
 
+Unfortunately, Eurostat data did not have the information on the occupation of immigrants for each state. We cannot say which skills immigrants to Germany have, for example. However, such data is available for France. From 2012-2019 almost 6845 Science and engineering professionals entered the French market. More than four thousend people have declared to have managerial skills and the same number of people could work as production and service managers. Yet, not that one person may have more than one professional qualification. There were only 6 teaching professionals and 16 health specialists. This closely answers the needs of the French market as people find jobs in the demanded areas. According to the Manpower report, the 3 main in-demand jobs in France are currently in the area of operation and logistics, manufacturing and production and administration and office support. Therefore, there is a chance that if the highly-skilled immigrants decide to stay in the country of destination, they may contribute to the state's economy and be the opportunity for growth. Nevertheless, it depends on other factors such as the inclusiveness of the society, accessibility of the job opportunities for foreigners and so on. Therefore it would require more data and further analysis. 
 
 <center>
 ```{r echo=FALSE}
