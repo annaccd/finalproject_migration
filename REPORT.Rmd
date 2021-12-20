@@ -1,5 +1,5 @@
 ---
-title: "Highly skilled migration to Europe in data"
+title: "High skilled migration to the EU in data"
 author: "Anna Clara Deniz: cunhadeniz@gmail.com and Anna Weronika Matysiak: annaweronika.matysiak@gmail.com"
 date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
 output:
@@ -52,6 +52,12 @@ library(rgdal)
 library(gridExtra)
 library(grid)
 library(geojsonio)
+library(maptools)
+library(gpclib)
+library(doBy)
+library(broom)
+library(mapproj)
+library(tmap)
 ```
 
 <center>
@@ -114,10 +120,11 @@ lines(inter, col="skyblue", lwd=1)
 </center>
 
 
-**The analysis of Eurostat Data "EU Blue Cards by type of decision, occupation and citizenship" from 2021, shows a few important patterns. From 2012 there has been a gradual increase in the number of granted EU Blue Cards. From 2012 till 2019, Germany, France, and Poland were the countries that accepted the most applicants… **
+**The analysis of Eurostat Data "EU Blue Cards by type of decision, occupation and citizenship" from 2021, shows a few important patterns. From 2012 there has been a gradual increase in the number of granted EU Blue Cards. From 2015 till 2019, the years with the highest migration rates, Germany, France, and Poland were the countries that accepted the most applicants. From that same time, the higher number of skilled migrants originated from Syria, Serbia and Pakistan.**
 
 
-Despite the continuous increase in the number of immigrants to the European Union, results from the Special [Eurobarometer 469](http://www.europeanmigrationlaw.eu/documents/EuroBarometer-IntegrationOfMigrantsintheEU.pdf) show that Europeans know very little about immigration. Around 37% of people said that they are very well informed and only around 4% declared that they are very well informed. Moreover, almost 30% of those surveyed could not estimate the percentage of immigrants from outside of the EU in their countries. On the other extreme, around 17% claimed that the share of immigrants is over ¼ of inhabitants of their countries. Despite little knowledge, people still are entitled to have an opinion on the effects of immigration. In the same survey, around 38% of respondents stated that immigration from outside the EU is more of a problem and only 1/5 believed that immigration is an opportunity. Acknowledging little awareness about the immigration phenomenon, this article aims to fill this knowledge gap and provide insights into high-skilled migration from outside of the EU. The first part brings the readers closer to this issue and secondly attempts to investigate briefly to what extent this High-skilled immigration can be perceived as an opportunity on the example of France. This is particularly important in the light of the recently enacted New Pact on Migration and Asylum to attract more high-skilled migrants to the EU.
+Despite the continuous increase in the number of immigrants to the European Union, results from the Special [Eurobarometer 469](http://www.europeanmigrationlaw.eu/documents/EuroBarometer-IntegrationOfMigrantsintheEU.pdf) show that Europeans know very little about immigration. Around 37% of people said that they are very well informed and only around 4% declared that they are very well informed. Moreover, almost 30% of those surveyed could not estimate the percentage of immigrants from outside of the EU in their countries. On the other extreme, around 17% claimed that the share of immigrants is over ¼ of inhabitants of their countries. Despite little knowledge, people still are entitled to have an opinion on the effects of immigration. In the same survey, around 38% of respondents stated that immigration from outside the EU is more of a problem and only 1/5 believed that immigration is an opportunity. Acknowledging little awareness about the immigration phenomenon, this article aims to fill this knowledge gap and provide insights into high-skilled migration from outside of the EU. The first part brings the readers closer to this issue and secondly attempts to investigate briefly to what extent this high-skilled immigration can be perceived as an opportunity on the example of France. This is particularly important in the light of the recently enacted New Pact on Migration and Asylum to attract more high-skilled migrants to the EU.
+
 
 ---
 
@@ -127,22 +134,101 @@ Despite the continuous increase in the number of immigrants to the European Unio
 ----
 
 
-According to [Eurostat Data](http://appsso.eurostat.ec.europa.eu/nui/show.do?dataset=migr_resbc1), from 2012 till 2019, EU states received 179 597 applications. The number does not include the UK. Additionally, data for Croatia before accessing the EU are not available. More remarkably data for Cyprus and Greece are missing. Individual numbers are also absent for 2012. Still, the number of people that have applied over these years exceeds the population of Potsdam and is still increasing. Moreover, European Union has decided recently to simplify the process in order to attract more high-skilled workers to Europe. Note, that EU Blue Card does not apply in Denmark and Ireland.
+According to [Eurostat Data](http://appsso.eurostat.ec.europa.eu/nui/show.do?dataset=migr_resbc1), from 2012 till 2019, EU states received 179.597 applications. The number does not include the UK. Additionally, data for Croatia before accessing the EU are not available. More remarkably data for Cyprus and Greece are missing. Individual numbers are also absent for 2012. Still, the number of people that have applied over these years exceeds the population of Potsdam and is still increasing. Moreover, European Union has decided recently to simplify the process in order to attract more high-skilled workers to Europe. Note, that EU Blue Card does not apply in Denmark and Ireland.
 
+<br>
 <center>
 ```{r showChoro1, out.extra='style="border:none;"', fig.align="c", echo=FALSE }
 knitr::include_url("plots/plot_1.html")
 ```
 </center>
+<br>
 
-Mentioned data shows, that there is a clear increasing tendency in the granted applications. Above you can compare them, with the numbers of renewed but also withdrawn applications over years. As you can see, the Withdrawn applications also increased, however, in comparison to the successful applications the increase has been modest. There were only around 400 Withdrawn applications until 2019, whereas the granted applications increased by more than 30k.
-
+Mentioned data shows, that there is a clear increasing tendency in the granted applications. Above you can compare them, with the numbers of renewed but also withdrawn applications over years. As you can see, the withdrawn applications also increased, however, in comparison to the successful applications the increase has been modest. There were only around 400 withdrawn applications until 2019, whereas the granted applications increased by more than 30 thousand.
 
 ```{r fig.align="center", echo=FALSE}
 knitr::include_graphics("plots/gganim.gif")
 ```
 
-Nevertheless, the numbers of granted applications differed across the countries. The comparison with Potsdam was not accidental. According to Eurostat data, the majority of the successful applications were recorded in Germany, which over 7 years admitted almost 134 916 applications. In comparison, the second biggest number was noted in France - 7100. The third country with the highest number of successful applications was Poland that admitted 5257 immigrants. This is around 25% of the accepted applications in Germany. The animation below shows the accumulated increase of accepted applications for each top 15 EU states from 2012 till 2019.
+Nevertheless, the numbers of granted applications differed across the countries. The comparison with Potsdam was not accidental. According to Eurostat data, the majority of the successful applications were recorded in Germany, which over 7 years admitted almost 134.916 applications. In comparison, the second biggest number was noted in France - 7.100. The third country with the highest number of successful applications was Poland that admitted 5.257 immigrants. This is around 25% of the accepted applications in Germany. The animation above shows the accumulated increase of accepted applications for each top 15 EU states from 2012 till 2019.
+
+<br>
+<center>
+```{r echo=FALSE, warning=FALSE}
+eu_data <- read_csv("data/data_partial.csv")
+
+geo_data <- eu_data %>%
+  mutate(Value = as.numeric(Value)) %>%
+  filter (!GEO %in% c("European Union - 27 countries (from 2020)", 
+                      "European Union - 28 countries (2013-2020)")) %>%
+  group_by(GEO) %>%
+  summarize(Total = sum(Value, na.rm = TRUE)) %>%
+  filter(Total != 0) %>%
+  arrange(desc(Total))
+
+world <- read_sf("data/ne_50m_admin_0_countries.shp") 
+
+eu_shapefiles <- world %>%
+  filter(ADMIN == "Germany"|
+           ADMIN == "France"|
+           ADMIN == "Poland"|
+           ADMIN == "Luxembourg"|
+           ADMIN == "Italy"|
+           ADMIN == "Czechia"|
+           ADMIN == "Austria"|
+           ADMIN == "Latvia"|
+           ADMIN == "Lithuania"|
+           ADMIN == "Bulgaria"|
+           ADMIN == "Romania"|
+           ADMIN == "Netherlands"|
+           ADMIN == "Croatia"|
+           ADMIN == "Finland"|
+           ADMIN == "Belgium"|
+           ADMIN == "Spain"|
+           ADMIN == "Slovenia"|
+           ADMIN == "Estonia"|
+           ADMIN == "Malta"|
+           ADMIN == "Slovakia"|
+           ADMIN == "Hungary"|
+           ADMIN == "Portugal"|
+           ADMIN == "Sweden"|
+           ADMIN == "Greece") %>%
+  mutate(location = ADMIN) %>%
+  select(location, geometry)
+
+geo_data2 <- geo_data$GEO[geo_data$GEO=="Germany (until 1990 former territory of the FRG)"]<-"Germany"
+geo_data2 <- rename(geo_data, location = GEO)
+
+eu_database <- left_join(geo_data2, eu_shapefiles, by = "location")
+eu_database = st_as_sf(eu_database, crs = 4326)
+
+tmap_mode("view")
+tm_shape(eu_database) +
+  tm_polygons("Total",
+              style = "fixed",
+              palette = "Blues",
+              contrast = .9,
+              id = "location",
+              breaks = c(10, 100, 500, 1000, 2000, 5000, 10000, 50000, 100000),
+              legend.hist = T,
+              title = "Skilled migrants") +
+  tm_layout(legend.bg.color = "grey90", legend.bg.alpha = .5, legend.outside = T, title = "Accumulated sum of skilled migrants per EU country (2015-2019)", title.position = c('right', 'top'))
+```
+</center>
+<br>
+
+Amongst the countries that receive the least amount of migrants are Malta, Slovakia, Hungary, Portugal, Sweden and Greece, with less than 100 skilled migrants in total for a five year period. The huge contrast that Germany has with other countries can potentially be explained by the size of its economy, making it more financially attractive for highly skilled, educated people around the globe that wish to migrate to Europe. A second argument that can potentially explain Germany’s success in attracting skilled workers is its social infrastructure, which can also be an asset for these workers. According to a government website design to allure migrants to the country, [Make it in Germany](https://www.make-it-in-germany.com/en/living-in-germany/discover-germany/economy), “Europe’s largest economy scores highest with its excellent infrastructure, its highly developed corporate and services sector, its system of higher education, its first-rate vocational training, especially in the skilled crafts and trades, and, last but not least, its capacity to deliver technological innovations.”
+
+<br>
+<center>
+```{r echo=FALSE}
+knitr::include_graphics("plots/plot_4.png")
+```
+</center>
+<br>
+
+Regarding countries of origin, Syria (3.870), Serbia (2.842), Pakistan (2.595), Mexico (2.261) and Tunisia (2.042) formed the top 5 when analyzing the total sum between 2015 and 2019. While this pattern stayed similar to most of the countries, an interesting pattern is perceived in eastern part of the EU, specially Poland, Czechia, Austria, Latvia, Lithuania and Bulgaria. In these countries it is noticeable the high migration of workers originating mostly Russia and Ukraine. This flow can perhaps be explained by the proximity of these countries, not only geographically speaking, but also culturally and historically. Moving forward, let's have a look at the professional profile of the migrant workers to the EU.
+
 
 ---
 
@@ -153,20 +239,17 @@ in 2025. The share of those with low-level qualifications will fall from 21.5% i
 
 ---
 
+
 Could these high-skilled immigrants be the response to the mismatch of the skills and skills gap at the EU market? Potentially, looking at the qualification of the professionals from the outside of Europe, we can see a few patterns that could be insightful. The stable and consequent increase can be observed among people who declare to have background in science and engineering but also among these who claim to be ICT professionals. These skills are sought-after at the EU market. For example, only in 2019 55% surveyed companies experienced difficulties in recruiting ICT specialists [Eurostat.](https://ec.europa.eu/eurostat/databrowser/view/isoc_ske_itspen2/default/table?lang=en)
 
-
+<br>
 <center>
 ```{r showChoro2, out.extra='style="border:none;"', fig.align="center", echo=FALSE}
 knitr::include_url("plots/plot_2.html")
 ```
 </center>
 
-Unfortunately, Eurostat data did not have the information on the occupation of immigrants for each state. We cannot say which skills immigrants to Germany have, for example. However, such data is available for France. From 2012-2019 almost 6845 Science and engineering professionals entered the French market. More than four thousand people have declared to have managerial skills and the same number of people could work as production and service managers. Yet, not that one person may have more than one professional qualification. There were only 6 teaching professionals and 16 health specialists. This closely answers the needs of the French market as people find jobs in the demanded areas. According to the Manpower report, the 3 main in-demand jobs in France are currently in the area of operation and logistics, manufacturing and production and administration and office support. Therefore, there is a chance that if the highly-skilled immigrants decide to stay in the country of destination, they may contribute to the state's economy and be the opportunity for growth. Nevertheless, it depends on other factors such as the inclusiveness of the society, accessibility of the job opportunities for foreigners and so on. Therefore it would require more data and further analysis. 
+Unfortunately, Eurostat data did not have the information on the occupation of immigrants for each state. We cannot say which skills immigrants to Germany have, for example. However, such data is available for France. From 2012-2019 almost 6.845 science and engineering professionals entered the french market. More than four thousand people have declared to have managerial skills and the same number of people could work as production and service managers. Yet, not that one person may have more than one professional qualification. There were only 6 teaching professionals and 16 health specialists. This closely answers the needs of the french market as people find jobs in the demanded areas. According to the Manpower report, the 3 main in-demand jobs in France are currently in the area of operation and logistics, manufacturing and production and administration and office support. Therefore, there is a chance that if the highly-skilled immigrants decide to stay in the country of destination, they may contribute to the state's economy and be the opportunity for growth. Nevertheless, it depends on other factors such as the inclusiveness of the society, accessibility of the job opportunities for foreigners and so on.
 
-<center>
-```{r echo=FALSE}
-knitr::include_graphics("plots/plot_4.png")
-```
-</center>
-<center>
+Data showed that the skilled migration to the EU is diverse and is intensifying over the years. While Germany remains the largest destination country, many others could benefit from the EU Blue Card program. As seen, skilled migration is not only beneficial to the migrants but can also have positive economic impacts in the countries receiving them. Further data analysis is required to estimate these impacts and the longing effects of skilled migration to the European Union.
+

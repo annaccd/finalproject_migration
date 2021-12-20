@@ -58,9 +58,11 @@ data<-read.csv("data/data_full.csv")
 # EU Blue Card Data 2015 - 2019
 eu_data <- read_csv("data/data_partial.csv")
 
-#"https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_0_countries.zip"  
+# Map data
+#world_file <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_0_countries.zip"  
+#download.file(world_file, destfile = "data/WORLD.zip")
+#unzip("data/WORLD.zip")
 world <- read_sf("data/ne_50m_admin_0_countries.shp") 
-
 ```
 
 3. Tidy Data
@@ -86,6 +88,7 @@ citizen_data <- eu_data %>%
   summarize(Total = sum(Value, na.rm = TRUE)) %>%
   filter(Total != 0) %>%
   arrange(desc(Total))
+view(citizen_data)
 
 # Total Accumulated Per Country 2015 - 2019
 geo_data <- eu_data %>%
@@ -334,33 +337,7 @@ p_europe <- citizen_data %>%
         axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
-  labs(title = "European Union", x = "", y = "")
-
-p_germany <- top_geo_data %>% 
-  filter(GEO == "Germany (until 1990 former territory of the FRG)") 
-p_germany <- p_germany %>% 
-  filter(CITIZEN %in% head(p_germany$CITIZEN,5)) %>% 
-  ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "gray", width=0.5) +
-  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(size = 15, face = "bold"),
-        axis.text.x = element_text(size = 15, face = "bold"),
-        panel.background = element_rect(fill = NA)) +
-  coord_flip() +
-  labs(title = "Germany", x = "", y = "")
-
-p_france <- top_geo_data %>% 
-  filter(GEO == "France") 
-p_france <- p_france %>% 
-  filter(CITIZEN %in% head(p_france$CITIZEN,5)) %>% 
-  ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "gray", width=0.5) +
-  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(size = 15, face = "bold"),
-        axis.text.x = element_text(size = 15, face = "bold"),
-        panel.background = element_rect(fill = NA)) +
-  coord_flip() +
-  labs(title = "France", x = "", y = "")
+  labs(title = "Accumulated sum of skilled migrants to EU countries per country of origin (2015-2019)", x = "", y = "")
 
 p_poland <- top_geo_data %>% 
   filter(GEO == "Poland")
@@ -374,32 +351,6 @@ p_poland <- p_poland %>%
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Poland", x = "", y = "")
-
-p_luxembourg <- top_geo_data %>% 
-  filter(GEO == "Luxembourg")
-p_luxembourg <- p_luxembourg %>%
-  filter(CITIZEN %in% head(p_luxembourg$CITIZEN,5)) %>% 
-  ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "gray", width=0.5) +
-  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(size = 15, face = "bold"),
-        axis.text.x = element_text(size = 15, face = "bold"),
-        panel.background = element_rect(fill = NA)) +
-  coord_flip() +
-  labs(title = "Luxembourg", x = "", y = "")
-
-p_italy <- top_geo_data %>% 
-  filter(GEO == "Italy")
-p_italy <- p_italy %>% 
-  filter(CITIZEN %in% head(p_italy$CITIZEN,5)) %>% 
-  ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "gray", width=0.5) +
-  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(size = 15, face = "bold"),
-        axis.text.x = element_text(size = 15, face = "bold"),
-        panel.background = element_rect(fill = NA)) +
-  coord_flip() +
-  labs(title = "Italy", x = "", y = "")
 
 p_czechia <- top_geo_data %>% 
   filter(GEO == "Czechia")
@@ -468,22 +419,18 @@ p_bulgaria <- p_bulgaria %>%
 p_bulgaria
 
 plot_4 <- grid.arrange(
-  p_europe,
-  p_germany,
-  p_france,
   p_poland,
-  p_luxembourg,
-  p_italy,
   p_czechia,
   p_austria,
   p_latvia,
   p_lithuania,
   p_bulgaria,
-  layout_matrix = rbind(c(1, 1, 2), c(3, 4, 5), c(6, 7, 8), c(9, 10, 11)),
+  layout_matrix = rbind(c(1, 2, 3), c(4, 5, 6)),
   top = textGrob(
-    "Accumulated sum of skilled migrants per country of origin (2015-2019)",
+    "Accumulated sum of skilled migrants to eastern EU countries per country of origin (2015-2019)",
     gp = gpar(fontface = 3, fontsize = 30),
     hjust = 0.5))
 
-ggsave("plots/plot_4.png", width = 35, height = 25, dpi = 400, limitsize = FALSE, plot_4)
+ggsave("plots/plot_4.png", width = 25, height = 15, dpi = 400, limitsize = FALSE, plot_4)
+ggsave("plots/plot_5.png", width = 15, height = 12, dpi = 400, p_europe)
 ```
