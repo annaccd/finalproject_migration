@@ -57,10 +57,6 @@ data<-read.csv("data/data_full.csv")
 
 # EU Blue Card Data 2015 - 2019
 eu_data <- read_csv("data/data_partial.csv")
-
-#"https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_0_countries.zip"  
-world <- read_sf("data/ne_50m_admin_0_countries.shp") 
-
 ```
 
 3. Tidy Data
@@ -276,6 +272,11 @@ lines(inter, col="skyblue", lwd=1)
 
 f. Interactive Europe map
 ```{r warning=FALSE}
+world_file <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_0_countries.zip"  
+download.file(world_file, destfile = "WORLD.zip")
+unzip("WORLD.zip")
+world <- read_sf("ne_50m_admin_0_countries.shp") 
+
 eu_shapefiles <- world %>%
   filter(ADMIN == "Germany"|
            ADMIN == "France"|
