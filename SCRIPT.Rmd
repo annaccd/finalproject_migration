@@ -11,7 +11,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+1. Load Libraries
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(data.table)
 library(R.utils)
@@ -38,18 +38,30 @@ library(rgdal)
 library(gridExtra)
 library(grid)
 library(geojsonio)
+library(maptools)
+library(gpclib)
+library(doBy)
+library(broom)
+library(mapproj)
+library(tmap)
 ```
 
+2. Import Data
 ```{r message=FALSE, warning=FALSE, include=FALSE}
-#gunzip("migr.tsv.gz")
-#dt = fread("migr.tsv", header=T, sep="\t", stringsAsFactors=F)
-#read_tsv("migr.tsv")
+# gunzip("migr.tsv.gz")
+# dt = fread("migr.tsv", header=T, sep="\t", stringsAsFactors=F)
+# read_tsv("migr.tsv")
 
-#http://appsso.eurostat.ec.europa.eu/nui/show.do
+# http://appsso.eurostat.ec.europa.eu/nui/show.do
 data<-read.csv("data/data_full.csv")
+
+# EU Blue Card Data 2015 - 2019
+eu_data <- read_csv("data/data_partial.csv")
 ```
 
+3. Tidy Data
 ```{r include=FALSE}
+# Total data 2012 - 2020
 data<- data %>% 
     mutate_at(vars(Value), ~ na_if(., "")) %>% na_if(.,":") %>%
         select(!Flag.and.Footnotes)%>%na.omit()
@@ -60,10 +72,42 @@ replaceCommas<-function(x){
 
 data$Value<-replaceCommas(data$Value)
 data$GEO[data$GEO=="Germany (until 1990 former territory of the FRG)"]<-"Germany"
+
+# Total Accumulated Per Citizenship 2015 - 2019
+citizen_data <- eu_data %>%
+  mutate(Value = as.numeric(Value)) %>%
+  filter (GEO %in% c("European Union - 27 countries (from 2020)", 
+                     "European Union - 28 countries (2013-2020)")) %>%
+  group_by(CITIZEN) %>%
+  summarize(Total = sum(Value, na.rm = TRUE)) %>%
+  filter(Total != 0) %>%
+  arrange(desc(Total))
+
+# Total Accumulated Per Country 2015 - 2019
+geo_data <- eu_data %>%
+  mutate(Value = as.numeric(Value)) %>%
+  filter (!GEO %in% c("European Union - 27 countries (from 2020)", 
+                      "European Union - 28 countries (2013-2020)")) %>%
+  group_by(GEO) %>%
+  summarize(Total = sum(Value, na.rm = TRUE)) %>%
+  filter(Total != 0) %>%
+  arrange(desc(Total))
+
+# Top Countries Per Citizenship 2015 - 2019
+top_geo_data <- eu_data %>%
+  mutate(Value = as.numeric(Value)) %>%
+  filter (!GEO %in% c("European Union - 27 countries (from 2020)", 
+                      "European Union - 28 countries (2013-2020)"),
+            GEO %in% head(geo_data$GEO, 10)) %>%
+  group_by(GEO, CITIZEN) %>%
+  summarize(Total = sum(Value, na.rm = TRUE)) %>%
+  filter(Total != 0) %>%
+  arrange(GEO, desc(Total))
 ```
 
-A. Connected scatter plot of all decision by its type
+4. Plot Data
 
+a. Connected scatter plot of all decision by its type
 ```{r echo=FALSE, warning=FALSE}
 
 plotly_data_1<-data %>% 
@@ -87,7 +131,7 @@ total<-data %>%
 sum(total$Value)
 ```
 
-B.OCCUPATIONS
+b. Occupations
 ```{r echo=FALSE, warning=FALSE}
 plotly_data<-data %>%filter(DECISION=="Granted")%>% filter(GEO=="European Union - 27 countries (from 2020)" | GEO=="European Union - 28 countries (2013-2020)")%>%filter(ISCO08!="Total" & ISCO08!="Unknown")%>%filter(TIME!="2020")%>%
   group_by(ISCO08,TIME)%>%ungroup()
@@ -103,8 +147,7 @@ htmlwidgets::saveWidget(plot_2, file = "plots/plot_2.html")
 plot_2
 ```
 
-C. ANIMATION
-
+c. Animations
 ```{r warning=FALSE}
 ranked_by_year<-data %>%filter(DECISION=="Granted" & ISCO08=="Total")%>%filter(GEO!="European Union - 27 countries (from 2020)" & GEO!="European Union - 28 countries (2013-2020)")%>% filter(TIME!=2020)%>%
   select(TIME, GEO, Value) %>%group_by(GEO)%>% mutate(pop=cumsum(Value))%>%group_by(TIME)%>%
@@ -155,7 +198,8 @@ transition_length = 4, state_length = 1, wrap = FALSE) +
 animate(animated, 150, fps = 5,  end_pause = 50, duration = 40,
         renderer = gifski_renderer("plots/gganim.gif"))
 ```
-D France
+
+d. France
 ```{r message=FALSE, warning=FALSE}
 table_1<-data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO=="France")%>%filter(TIME==2019)%>%
   filter(DECISION=="Granted")%>%unique()%>%
@@ -164,57 +208,8 @@ table_1<-data%>% group_by(GEO, ISCO08)%>% mutate(pop=cumsum(Value))%>%filter(GEO
 table_1
 ```
 
-Import Data
-
-```{r message=FALSE, warning=FALSE}
-
-# EU Blue Card Data
-eu_data <- read_csv("data/data_partial.csv")
-
-
-```
-
-Tidy Data
-
+e. Connected world map
 ```{r warning=FALSE}
-
-# Total Accumulated Per Citizenship
-citizen_data <- eu_data %>%
-  mutate(Value = as.numeric(Value)) %>%
-  filter (GEO %in% c("European Union - 27 countries (from 2020)", 
-                     "European Union - 28 countries (2013-2020)")) %>%
-  group_by(CITIZEN) %>%
-  summarize(Total = sum(Value, na.rm = TRUE)) %>%
-  filter(Total != 0) %>%
-  arrange(desc(Total))
-
-# Total Accumulated Per Country
-geo_data <- eu_data %>%
-  mutate(Value = as.numeric(Value)) %>%
-  filter (!GEO %in% c("European Union - 27 countries (from 2020)", 
-                      "European Union - 28 countries (2013-2020)")) %>%
-  group_by(GEO) %>%
-  summarize(Total = sum(Value, na.rm = TRUE)) %>%
-  filter(Total != 0) %>%
-  arrange(desc(Total))
-
-# Top Countries Per Citizenship
-top_geo_data <- eu_data %>%
-  mutate(Value = as.numeric(Value)) %>%
-  filter (!GEO %in% c("European Union - 27 countries (from 2020)", 
-                      "European Union - 28 countries (2013-2020)"),
-            GEO %in% head(geo_data$GEO, 10)) %>%
-  group_by(GEO, CITIZEN) %>%
-  summarize(Total = sum(Value, na.rm = TRUE)) %>%
-  filter(Total != 0) %>%
-  arrange(GEO, desc(Total))
-
-```
-
-Plot Data
-
-```{r warning=FALSE}
-# World Map
 data("world.cities")
 citizen_coordinates <- world.cities %>%
   filter (country.etc %in% head(citizen_data$CITIZEN, 10),
@@ -275,40 +270,82 @@ inter <- gcIntermediate(SKorea, Europe, n=50, addStartEnd=TRUE, breakAtDateLine=
 lines(inter, col="skyblue", lwd=1)
 ```
 
+f. Interactive Europe map
 ```{r warning=FALSE}
+world_file <- "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_0_countries.zip"  
+download.file(world_file, destfile = "WORLD.zip")
+unzip("WORLD.zip")
+world <- read_sf("ne_50m_admin_0_countries.shp") 
 
-# Europe Interactive Map
-geo_data <- mutate(geo_data, "CountryCode" = c("DE", "FR", "PL", "LU", "IT", "CZ", "AT", "LV", "LT", "BG", "RO", "NL", "HR", "FI", "BE", "ES", "SK", "EE", "MT", "SK", "HU", "PT", "SE", "EL"))
+eu_shapefiles <- world %>%
+  filter(ADMIN == "Germany"|
+           ADMIN == "France"|
+           ADMIN == "Poland"|
+           ADMIN == "Luxembourg"|
+           ADMIN == "Italy"|
+           ADMIN == "Czechia"|
+           ADMIN == "Austria"|
+           ADMIN == "Latvia"|
+           ADMIN == "Lithuania"|
+           ADMIN == "Bulgaria"|
+           ADMIN == "Romania"|
+           ADMIN == "Netherlands"|
+           ADMIN == "Croatia"|
+           ADMIN == "Finland"|
+           ADMIN == "Belgium"|
+           ADMIN == "Spain"|
+           ADMIN == "Slovenia"|
+           ADMIN == "Estonia"|
+           ADMIN == "Malta"|
+           ADMIN == "Slovakia"|
+           ADMIN == "Hungary"|
+           ADMIN == "Portugal"|
+           ADMIN == "Sweden"|
+           ADMIN == "Greece") %>%
+  mutate(location = ADMIN) %>%
+  select(location, geometry)
 
-m <- leaflet() %>% 
-  addTiles() %>% 
-  setView( lng = 15, lat = 49, zoom = 3)
+geo_data2 <- geo_data$GEO[geo_data$GEO=="Germany (until 1990 former territory of the FRG)"]<-"Germany"
+geo_data2 <- rename(geo_data, location = GEO)
 
+eu_database <- left_join(geo_data2, eu_shapefiles, by = "location")
+eu_database = st_as_sf(eu_database, crs = 4326)
+
+tmap_mode("view")
+tm_shape(eu_database) +
+  tm_polygons("Total",
+              style = "fixed",
+              palette = "Blues",
+              contrast = .9,
+              id = "location",
+              breaks = c(10, 100, 500, 1000, 2000, 5000, 10000, 50000, 100000),
+              legend.hist = T,
+              title = "Skilled migrants") +
+  tm_layout(legend.bg.color = "grey90", legend.bg.alpha = .5, legend.outside = T, title = "Accumulated sum of skilled migrants per EU country (2015-2019)", title.position = c('right', 'top'))
 ```
 
+g. Bar plots
 ```{r warning=FALSE}
-
-# Bar Plots
 p_europe <- citizen_data %>% 
   filter(CITIZEN %in% head(citizen_data$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "skyblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "European Union", x = "", y = "")
 
 p_germany <- top_geo_data %>% 
-  filter(GEO == "Germany (until 1990 former territory of the FRG)")  
+  filter(GEO == "Germany (until 1990 former territory of the FRG)") 
 p_germany <- p_germany %>% 
   filter(CITIZEN %in% head(p_germany$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Germany", x = "", y = "")
@@ -318,24 +355,23 @@ p_france <- top_geo_data %>%
 p_france <- p_france %>% 
   filter(CITIZEN %in% head(p_france$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "France", x = "", y = "")
-p_france
 
 p_poland <- top_geo_data %>% 
   filter(GEO == "Poland")
 p_poland <- p_poland %>% 
   filter(CITIZEN %in% head(p_poland$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Poland", x = "", y = "")
@@ -345,91 +381,92 @@ p_luxembourg <- top_geo_data %>%
 p_luxembourg <- p_luxembourg %>%
   filter(CITIZEN %in% head(p_luxembourg$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Luxembourg", x = "", y = "")
 
 p_italy <- top_geo_data %>% 
-  filter(GEO == "Italy") 
+  filter(GEO == "Italy")
 p_italy <- p_italy %>% 
   filter(CITIZEN %in% head(p_italy$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Italy", x = "", y = "")
 
 p_czechia <- top_geo_data %>% 
-  filter(GEO == "Czechia") 
+  filter(GEO == "Czechia")
 p_czechia <- p_czechia %>%
   filter(CITIZEN %in% head(p_czechia$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Czechia", x = "", y = "")
 
 p_austria <- top_geo_data %>% 
-  filter(GEO == "Austria") 
+  filter(GEO == "Austria")
 p_austria <- p_austria %>% 
   filter(CITIZEN %in% head(p_austria$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Austria", x = "", y = "")
 
 p_latvia <- top_geo_data %>% 
-  filter(GEO == "Latvia") 
+  filter(GEO == "Latvia")
 p_latvia <- p_latvia %>% 
   filter(CITIZEN %in% head(p_latvia$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Latvia", x = "", y = "")
 
 p_lithuania <- top_geo_data %>% 
-  filter(GEO == "Lithuania") 
+  filter(GEO == "Lithuania")
 p_lithuania <- p_lithuania %>% 
   filter(CITIZEN %in% head(p_lithuania$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Lithuania", x = "", y = "")
 
 p_bulgaria <- top_geo_data %>% 
-  filter(GEO == "Bulgaria")
+  filter(GEO == "Bulgaria") 
 p_bulgaria <- p_bulgaria %>% 
   filter(CITIZEN %in% head(p_bulgaria$CITIZEN,5)) %>% 
   ggplot(aes(x = reorder(CITIZEN, Total), y = Total)) +
-  geom_bar(stat = "identity", fill = "slateblue", width=0.5) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.text.y = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"),
+  geom_bar(stat = "identity", fill = "gray", width=0.5) +
+  theme(plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.text.x = element_text(size = 15, face = "bold"),
         panel.background = element_rect(fill = NA)) +
   coord_flip() +
   labs(title = "Bulgaria", x = "", y = "")
+p_bulgaria
 
 plot_4 <- grid.arrange(
   p_europe,
@@ -444,8 +481,10 @@ plot_4 <- grid.arrange(
   p_lithuania,
   p_bulgaria,
   layout_matrix = rbind(c(1, 1, 2), c(3, 4, 5), c(6, 7, 8), c(9, 10, 11)),
-  top = "Accumulated sum of migrants to EU countries per country of origin between 2015 and 2019")
+  top = textGrob(
+    "Accumulated sum of skilled migrants per country of origin (2015-2019)",
+    gp = gpar(fontface = 3, fontsize = 30),
+    hjust = 0.5))
 
-ggsave("plots/plot_4.png", width = 18, height = 15, dpi = 400, limitsize = FALSE, plot_4)
-
+ggsave("plots/plot_4.png", width = 35, height = 25, dpi = 400, limitsize = FALSE, plot_4)
 ```

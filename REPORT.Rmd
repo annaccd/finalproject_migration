@@ -1,6 +1,6 @@
 ---
 title: "Highly skilled migration to Europe in data"
-author: "Anna Clara Deniz and Anna Weronika Matysiak: annaweronika.matysiak@gmail.com"
+author: "Anna Clara Deniz: cunhadeniz@gmail.com and Anna Weronika Matysiak: annaweronika.matysiak@gmail.com"
 date: "`r format(Sys.time(), '%B %d, %Y | %H:%M:%S | %Z')`"
 output:
   html_document:
@@ -56,7 +56,7 @@ library(geojsonio)
 
 <center>
 ```{r echo=FALSE, warning=FALSE}
-#graphics for the beckground
+#graphics for the background
 Europe <- c(2,49)
 Syria <- c(36.32,33.50)        
 Serbia <- c(20.50,44.83)        
@@ -162,7 +162,7 @@ knitr::include_url("plots/plot_2.html")
 ```
 </center>
 
-Unfortunately, Eurostat data did not have the information on the occupation of immigrants for each state. We cannot say which skills immigrants to Germany have, for example. However, such data is available for France. From 2012-2019 almost 6845 Science and engineering professionals entered the French market. More than four thousend people have declared to have managerial skills and the same number of people could work as production and service managers. Yet, not that one person may have more than one professional qualification. There were only 6 teaching professionals and 16 health specialists. This closely answers the needs of the French market as people find jobs in the demanded areas. According to the Manpower report, the 3 main in-demand jobs in France are currently in the area of operation and logistics, manufacturing and production and administration and office support. Therefore, there is a chance that if the highly-skilled immigrants decide to stay in the country of destination, they may contribute to the state's economy and be the opportunity for growth. Nevertheless, it depends on other factors such as the inclusiveness of the society, accessibility of the job opportunities for foreigners and so on. Therefore it would require more data and further analysis. 
+Unfortunately, Eurostat data did not have the information on the occupation of immigrants for each state. We cannot say which skills immigrants to Germany have, for example. However, such data is available for France. From 2012-2019 almost 6845 Science and engineering professionals entered the French market. More than four thousand people have declared to have managerial skills and the same number of people could work as production and service managers. Yet, not that one person may have more than one professional qualification. There were only 6 teaching professionals and 16 health specialists. This closely answers the needs of the French market as people find jobs in the demanded areas. According to the Manpower report, the 3 main in-demand jobs in France are currently in the area of operation and logistics, manufacturing and production and administration and office support. Therefore, there is a chance that if the highly-skilled immigrants decide to stay in the country of destination, they may contribute to the state's economy and be the opportunity for growth. Nevertheless, it depends on other factors such as the inclusiveness of the society, accessibility of the job opportunities for foreigners and so on. Therefore it would require more data and further analysis. 
 
 <center>
 ```{r echo=FALSE}
